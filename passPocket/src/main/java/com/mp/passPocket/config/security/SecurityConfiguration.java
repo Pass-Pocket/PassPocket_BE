@@ -28,7 +28,8 @@ public class SecurityConfiguration {
              .requestMatchers("/v3/api-docs/**", 
                      "/swagger-ui/**", 
                      "/swagger-ui.html"
-                     ,"auth/**").permitAll() // 해당 경로들은 인증 없이 접근 가능
+                     ,"auth/**"
+                     ,"flight/**").permitAll() // 해당 경로들은 인증 없이 접근 가능
              .anyRequest().authenticated() // 그 외 모든 요청은 인증 필요
          );
 
