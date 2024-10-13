@@ -21,6 +21,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+    	
+//    	// Jackson의 기본 HttpMessageConverter 제거
+//        converters.removeIf(converter -> converter instanceof org.springframework.http.converter.json.MappingJackson2HttpMessageConverter);
+//        
+    	// Gson HttpMessageConverter 작성
         converters.add(new GsonHttpMessageConverter(gson()));
     }
 }

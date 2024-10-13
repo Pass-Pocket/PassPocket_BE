@@ -1,6 +1,5 @@
 package com.mp.passPocket.flight.data.dto.request;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,11 +11,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
-@Builder
-public class PortCodeRequest {
-
-	String subType = "any";
-	String keyword;
-	int limit = 10;
-
+public class FlightSearchSegment  {
+	
+	private String originLocationCode;
+	private String destinationLocationCode;
+	private String departureDate;
+	
 }
