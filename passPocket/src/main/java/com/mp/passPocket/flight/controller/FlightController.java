@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.amadeus.exceptions.ResponseException;
 import com.amadeus.resources.FlightOfferSearch;
 import com.mp.passPocket.common.connect.sdk.AmadeusConnect;
+import com.mp.passPocket.flight.data.dto.request.SearchConditionRequest;
 import com.mp.passPocket.flight.data.dto.request.SearchFlightMultiRequest;
 import com.mp.passPocket.flight.data.dto.request.SearchFlightRequest;
 import com.mp.passPocket.flight.data.dto.request.SearchFlightRoundRequest;
@@ -111,7 +112,7 @@ public class FlightController {
     public FlightListResponse searchFlightRound(
     		@Parameter(description = "searchFlight request details", required = true)
 	        @RequestBody SearchFlightRoundRequest searchFlightRoundRequest
-    		) throws ResponseException {
+	       ) throws ResponseException {
 		FlightListResponse response;
 		
 		LOGGER.info("[FlightController] - 왕복 항공편 목록 조회 요청");
@@ -156,7 +157,7 @@ public class FlightController {
     public FlightList[] searchFlightMulti(
     		@Parameter(description = "searchFlight request details", required = true)
 	        @RequestBody SearchFlightMultiRequest searchFlightMultiRequest
-    		) throws ResponseException {
+	       ) throws ResponseException {
 		LOGGER.info("[FlightController] - 다구간 항공편 목록 조회 요청");
 		
 //		searchFlightMultiRequest.getList().stream().forEach()
@@ -168,6 +169,46 @@ public class FlightController {
 		FlightList[] offersResponse = flightService.getFlightResponse(flightOffers);
         return offersResponse;
 	}
+	
+	
+	@Operation(summary = "GetFlightList", description = "항공편 목록 조회 - 다구간")
+	@PostMapping("get-flightlist/condition")
+    public FlightList[] searchConditionReqeust(
+	        @Parameter(description = "Condition", required = true)
+	        @RequestBody SearchConditionRequest searchConditionRequest
+	       ) throws ResponseException {
+		
+		FlightList[] cachedFlightOffers = flightService.getFlightOffers(searchConditionRequest.getRedisKey());
+		LOGGER.info("[FlightController] - 정렬 및 필터 항공편 목록 캐시 데이터 조회 : " + cachedFlightOffers.length);
+		
+		
+		FlightList[] filterList = flightService.getFlightFilterResponse(cachedFlightOffers, searchConditionRequest);
+		
+		String sortCondition = searchConditionRequest.getSortCondition();
+		//정렬 기준 적용
+		if(!sortCondition.equals("recommand")) {
+			FlightList[] offersResponse = flightService.getFlightSortResponse(filterList, sortCondition);
+			LOGGER.info("[FlightController] - 항공편 필터 및 정렬 적용 완료 : " + offersResponse.length);
+			return offersResponse;
+		}
+
+
+		LOGGER.info("[FlightController] - 항공편 필터 적용 완료 : " + filterList.length);
+		
+		return filterList;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

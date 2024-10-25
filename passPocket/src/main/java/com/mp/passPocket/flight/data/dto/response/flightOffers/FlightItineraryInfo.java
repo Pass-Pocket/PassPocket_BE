@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FlightItineraryInfo {
 	
+	private int transfer; // 환승 수
 	private FlightSearchSegment[] segments;
 
 }

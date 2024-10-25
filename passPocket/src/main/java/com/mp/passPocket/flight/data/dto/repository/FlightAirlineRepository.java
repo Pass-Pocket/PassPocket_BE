@@ -12,7 +12,7 @@ import com.mp.passPocket.flight.data.entity.PortCode;
 public interface FlightAirlineRepository extends JpaRepository<Airline, String>  {
 	
 	// 특정 필드만 반환하도록 @Query 어노테이션을 추가
-    @Query("SELECT a.airlineName FROM Airline a WHERE a.airlineCode = :airlineCode")
+    @Query("SELECT a.airlineName FROM Airline a WHERE a.airlineCode = :airlineCode AND ROWNUM <= 1")
     String findAirlineNameByAirlineCode(@Param("airlineCode") String airlineCode);
     
     

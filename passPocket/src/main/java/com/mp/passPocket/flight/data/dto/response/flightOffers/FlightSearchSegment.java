@@ -14,6 +14,7 @@ public class FlightSearchSegment {
 	private FlightInfo departure;
 	private FlightInfo arrival;
 	private String carrierCode;
+	private String carrierNumber;
 	private String carrierName;
 	private String aircraft;
 	private String duration;

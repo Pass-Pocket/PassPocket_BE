@@ -60,6 +60,7 @@ public class AmadeusConnect {
     	
     	LOGGER.info("[AmadeusConnect] - 편도 목록조회 호출");
     	
+    	
         return amadeus.shopping.flightOffersSearch.get(
                   Params.with("originLocationCode", searchFlightRequest.getOriginLocationCode())
                           .and("destinationLocationCode", searchFlightRequest.getDestinationLocationCode())
@@ -70,13 +71,15 @@ public class AmadeusConnect {
     }
     
     
-    
     /**
      * 
      * @param searchFlightRoundRequest
      * @return
      * @throws ResponseException
      */
+    
+    
+    
     public FlightOfferSearch[] flights(SearchFlightRoundRequest searchFlightRoundRequest) throws ResponseException {
 		LOGGER.info("[AmadeusConnect] - 왕복 목록조회 호출");
     	

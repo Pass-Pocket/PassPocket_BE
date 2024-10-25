@@ -1,5 +1,8 @@
 package com.mp.passPocket.flight.service.impl;
 
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -11,8 +14,10 @@ import org.springframework.stereotype.Service;
 
 import com.amadeus.resources.FlightOfferSearch;
 import com.amadeus.resources.FlightOfferSearch.SearchSegment;
+import com.amadeus.shopping.FlightOffers;
 import com.mp.passPocket.flight.data.dto.repository.FlightAirlineRepository;
 import com.mp.passPocket.flight.data.dto.repository.FlightLocationRepository;
+import com.mp.passPocket.flight.data.dto.request.SearchConditionRequest;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightInfo;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightItineraryInfo;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightList;
@@ -99,7 +104,8 @@ public class FlightServiceImpl implements FlightService {
 					FlightSearchSegment newSeg = FlightSearchSegment.builder()
 							.departure(departure)
 							.arrival(arrival)
-							.carrierCode(oriSeg.getCarrierCode() + oriSeg.getNumber())
+							.carrierCode(oriSeg.getCarrierCode())
+							.carrierNumber(oriSeg.getNumber())
 							.carrierName(flightAirlineRepositroy.findAirlineNameByAirlineCode(oriSeg.getCarrierCode()))
 							.aircraft(oriSeg.getAircraft().getCode())
 							.duration(oriSeg.getDuration())
@@ -112,7 +118,7 @@ public class FlightServiceImpl implements FlightService {
 				
 				
 				
-				FlightItineraryInfo info = FlightItineraryInfo.builder().segments(newIt).build();
+				FlightItineraryInfo info = FlightItineraryInfo.builder().transfer(newIt.length-1).segments(newIt).build();
 				itineraries[j] = info;
 			}
 			
@@ -135,11 +141,67 @@ public class FlightServiceImpl implements FlightService {
 	}
 	
 	
+	@Override
+	public FlightList[] getFlightFilterResponse(FlightList[] flightOffers,
+	                                            SearchConditionRequest searchConditionRequest) {
+	    List<String> numOfStopList = Arrays.asList(searchConditionRequest.getNumOfStop());
+	    List<String> preferAirlineList = Arrays.asList(searchConditionRequest.getPreferAirline());
+
+	    return Arrays.stream(flightOffers)
+	        .filter(flight -> 
+	            Arrays.stream(flight.getItineraries())
+	                .anyMatch(itinerary -> 
+	                    numOfStopList.contains(String.valueOf(itinerary.getTransfer())) &&
+	                    Arrays.stream(itinerary.getSegments())
+	                        .anyMatch(segment -> preferAirlineList.contains(segment.getCarrierCode()))
+	                )
+	        )
+	        .toArray(FlightList[]::new);
+	}
+
+
+	@Override
 	
+	public FlightList[] getFlightSortResponse(FlightList[] flightOffers
+			, String sort) {
+		
+		switch(sort) {
+		case "LowestPrice" : 
+			return Arrays.stream(flightOffers).sorted(Comparator.comparing(item -> item.getPrice().getTotal())).toArray(FlightList[]::new);
+			
+		case "MinTransfer" : 
+			
+			return Arrays.stream(flightOffers)
+		      .sorted(Comparator.comparing(item -> 
+		            Arrays.stream(item.getItineraries())
+		                  .mapToInt(ItinerariesItem -> ItinerariesItem.getTransfer())
+		                  .sum()
+		      ))
+		      .toArray(FlightList[]::new);
+			
+		case "ShortestDuration" : 
+			return Arrays.stream(flightOffers)
+				    .sorted(Comparator.comparing(item -> 
+			        Arrays.stream(item.getItineraries())
+			            .flatMap(itinerary -> Arrays.stream(itinerary.getSegments()))
+			            .mapToInt(segment -> {
+			                Duration duration = Duration.parse(segment.getDuration());
+			                return (int) duration.toMinutes();
+			            })
+			            .sum() 
+			    ))
+			    .toArray(FlightList[]::new);
+		}
+		
+		return null;
+	}
 
-
+	
+	
+	
+	
 	/*
-	 * Redis 관련
+	 * Redis 관련 메소드
 	 */
 	
 	// 항공편 정보를 Redis에 저장하는 메소드
@@ -151,8 +213,6 @@ public class FlightServiceImpl implements FlightService {
     public FlightList[] getFlightOffers(String flightKey) {
         return (FlightList[]) redisTemplate.opsForValue().get(flightKey);
     }
-
-
 
 
 	
