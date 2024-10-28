@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.amadeus.exceptions.ResponseException;
 import com.amadeus.resources.FlightOfferSearch;
 import com.mp.passPocket.common.connect.sdk.AmadeusConnect;
+import com.mp.passPocket.flight.data.dto.request.FlightDetailRequest;
 import com.mp.passPocket.flight.data.dto.request.SearchConditionRequest;
 import com.mp.passPocket.flight.data.dto.request.SearchFlightMultiRequest;
 import com.mp.passPocket.flight.data.dto.request.SearchFlightRequest;
 import com.mp.passPocket.flight.data.dto.request.SearchFlightRoundRequest;
+import com.mp.passPocket.flight.data.dto.response.FlightDetailResponse;
 import com.mp.passPocket.flight.data.dto.response.FlightListResponse;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightList;
 import com.mp.passPocket.flight.data.entity.PortCode;
@@ -197,6 +199,34 @@ public class FlightController {
 		
 		return filterList;
 	}
+	
+	
+	
+	
+	
+	@Operation(summary = "GetFlightDetail", description = "항공편 상세 조회")
+	@PostMapping("get-flightDetail")
+    public FlightDetailResponse getFlightDetail(
+    		@Parameter(description = "DetailResponse", required = true)
+	        @RequestBody FlightDetailRequest flightDetailRequest
+	       ) throws ResponseException {
+		
+		FlightList[] cachedFlightOffers = flightService.getFlightOffers(flightDetailRequest.getRedisKey());
+		
+		return FlightDetailResponse.builder()
+				.redisKey(flightDetailRequest.getRedisKey())
+				.flightId(flightDetailRequest.getFlightId())
+				.flight(flightService.getFlightDetail(cachedFlightOffers, flightDetailRequest.getFlightId()))
+				.build();
+		
+		
+		
+	}
+	
+	
+	
+	
+	
 	
 	
 	

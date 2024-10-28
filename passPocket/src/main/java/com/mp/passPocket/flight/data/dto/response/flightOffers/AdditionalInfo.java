@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FlightInfo {
-	
-	private String iataCode;
-	private String portName;
-	private String terminal;
-	private	String at;
+public class AdditionalInfo {
 
+	private String baggage;
+	private String recommandDepatureTime;
+	private String inFightMeal;
+	private String wifi;
+	
 }

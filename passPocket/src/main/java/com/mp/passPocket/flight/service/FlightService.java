@@ -21,6 +21,13 @@ public interface FlightService {
 	// FlightOffer Data Sort
 	FlightList[] getFlightSortResponse(FlightList[] flightOffers , String sort);
 	
+	//
+	FlightList getFlightDetail(FlightList[] flightOffers, String flightId);
+	
+	
+	/*
+	 * redis 관련 메소드
+	 */
 	// 항공편 정보를 Redis에 저장하는 메소드
 	public void saveFlightOffers(String flightKey, FlightList[] flightOffers);
 

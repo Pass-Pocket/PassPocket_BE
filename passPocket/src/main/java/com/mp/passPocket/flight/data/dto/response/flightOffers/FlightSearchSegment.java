@@ -19,5 +19,6 @@ public class FlightSearchSegment {
 	private String aircraft;
 	private String duration;
 	private String numberOfStops;
+	private AdditionalInfo info;
 
 }

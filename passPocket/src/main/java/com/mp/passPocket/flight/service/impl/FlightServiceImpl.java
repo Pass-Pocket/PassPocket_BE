@@ -18,6 +18,7 @@ import com.amadeus.shopping.FlightOffers;
 import com.mp.passPocket.flight.data.dto.repository.FlightAirlineRepository;
 import com.mp.passPocket.flight.data.dto.repository.FlightLocationRepository;
 import com.mp.passPocket.flight.data.dto.request.SearchConditionRequest;
+import com.mp.passPocket.flight.data.dto.response.flightOffers.AdditionalInfo;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightInfo;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightItineraryInfo;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightList;
@@ -90,15 +91,29 @@ public class FlightServiceImpl implements FlightService {
 					
 					SearchSegment oriSeg = oriIt[s];
 					
+					//Departure Data
 					FlightInfo departure = FlightInfo.builder().iataCode(oriSeg.getDeparture().getIataCode())
+							.portName(flightLocationRepositroy.findPNameKorByPCode(oriSeg.getDeparture().getIataCode()))
 							.at(oriSeg.getDeparture().getAt())
 							.terminal(oriSeg.getDeparture().getTerminal())
 							.build();
 					
+					
+					// Arrival Data
 					FlightInfo arrival = FlightInfo.builder()
 							.iataCode(oriSeg.getArrival().getIataCode())
+							.portName(flightLocationRepositroy.findPNameKorByPCode(oriSeg.getArrival().getIataCode()))
 							.at(oriSeg.getArrival().getAt())
 							.terminal(oriSeg.getArrival().getTerminal())
+							.build();
+					
+					
+					// AdditinalInfo Data
+					AdditionalInfo addInfo = AdditionalInfo.builder()
+							.baggage("무료 위탁 수하물 1개")
+							.recommandDepatureTime("07:30")
+							.wifi("T")
+							.inFightMeal("1회 제공")
 							.build();
 					
 					FlightSearchSegment newSeg = FlightSearchSegment.builder()
@@ -110,6 +125,7 @@ public class FlightServiceImpl implements FlightService {
 							.aircraft(oriSeg.getAircraft().getCode())
 							.duration(oriSeg.getDuration())
 							.numberOfStops(String.valueOf(oriSeg.getNumberOfStops()))
+							.info(addInfo)
 							.build();
 					
 
@@ -195,6 +211,18 @@ public class FlightServiceImpl implements FlightService {
 		
 		return null;
 	}
+	
+	
+	// 특정 FlightOffer 데이터
+	@Override
+	public FlightList getFlightDetail(FlightList[] flightOffers, String flightId) {
+		return Arrays.stream(flightOffers)
+                .filter(flight -> flightId.equals(flight.getFlightId()))
+                .findFirst()
+                .orElse(null); // 값이 없을 경우 null 반환
+	}
+	
+	
 
 	
 	
@@ -213,6 +241,10 @@ public class FlightServiceImpl implements FlightService {
     public FlightList[] getFlightOffers(String flightKey) {
         return (FlightList[]) redisTemplate.opsForValue().get(flightKey);
     }
+
+
+
+	
 
 
 	

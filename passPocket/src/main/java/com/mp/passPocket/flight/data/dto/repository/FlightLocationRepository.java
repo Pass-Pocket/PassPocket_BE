@@ -13,5 +13,7 @@ public interface FlightLocationRepository extends JpaRepository<PortCode, Intege
 	@Query("SELECT pc FROM PortCode pc WHERE (pc.PNameEng LIKE CONCAT('%', :PNameEng, '%') OR pc.PNameKor LIKE CONCAT('%', :PNameKor, '%') OR pc.country LIKE CONCAT('%', :country, '%')) AND ROWNUM <= :limit")
 	List<PortCode> searchWithRowNum(@Param("PNameEng") String PNameEng, @Param("PNameKor") String PNameKor, @Param("country") String country, @Param("limit") int limit);
 
+	@Query("SELECT pc.PNameKor FROM PortCode pc WHERE pc.pCode = :pCode")
+	String findPNameKorByPCode(@Param("pCode") String pCode);
 
 }
