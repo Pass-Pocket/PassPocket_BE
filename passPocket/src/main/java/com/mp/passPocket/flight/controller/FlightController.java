@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import com.amadeus.exceptions.ResponseException;
 import com.amadeus.resources.FlightOfferSearch;
 import com.mp.passPocket.common.connect.sdk.AmadeusConnect;
 import com.mp.passPocket.flight.data.dto.request.FlightDetailRequest;
+import com.mp.passPocket.flight.data.dto.request.SaveWishListRequest;
 import com.mp.passPocket.flight.data.dto.request.SearchConditionRequest;
 import com.mp.passPocket.flight.data.dto.request.SearchFlightMultiRequest;
 import com.mp.passPocket.flight.data.dto.request.SearchFlightRequest;
@@ -24,6 +26,7 @@ import com.mp.passPocket.flight.data.dto.response.FlightDetailResponse;
 import com.mp.passPocket.flight.data.dto.response.FlightListResponse;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightList;
 import com.mp.passPocket.flight.data.entity.PortCode;
+import com.mp.passPocket.flight.data.entity.WishList;
 import com.mp.passPocket.flight.service.FlightService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -215,14 +218,31 @@ public class FlightController {
 		
 		return FlightDetailResponse.builder()
 				.redisKey(flightDetailRequest.getRedisKey())
-				.flightId(flightDetailRequest.getFlightId())
 				.flight(flightService.getFlightDetail(cachedFlightOffers, flightDetailRequest.getFlightId()))
 				.build();
-		
-		
-		
 	}
 	
+	@Operation(summary = "SaveWishList", description = "위시리스트")
+	@PostMapping("save-wishList")
+    public String saveWishList(
+    		@Parameter(description = "DetailResponse", required = true)
+	        @RequestBody SaveWishListRequest saveWishListRequest
+	       ) throws ResponseException {
+		
+		FlightList[] cachedFlightOffers = flightService.getFlightOffers(saveWishListRequest.getRedisKey());
+		
+		FlightDetailResponse flight =  FlightDetailResponse.builder()
+				.redisKey(saveWishListRequest.getRedisKey())
+				.flight(flightService.getFlightDetail(cachedFlightOffers, saveWishListRequest.getFlightId()))
+				.build();
+		return flightService.saveWishItem(saveWishListRequest.getUserId(), flight);
+	}
+	
+	@Operation(summary = "GetWishList", description = "위시리스트 조회")
+	@GetMapping("get-wishList/{userId}")
+	public List<WishList> getWishList(@PathVariable String userId) {
+	    return flightService.getWishList(userId);
+	}
 	
 	
 	

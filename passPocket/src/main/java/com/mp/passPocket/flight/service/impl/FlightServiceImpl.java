@@ -14,10 +14,11 @@ import org.springframework.stereotype.Service;
 
 import com.amadeus.resources.FlightOfferSearch;
 import com.amadeus.resources.FlightOfferSearch.SearchSegment;
-import com.amadeus.shopping.FlightOffers;
 import com.mp.passPocket.flight.data.dto.repository.FlightAirlineRepository;
 import com.mp.passPocket.flight.data.dto.repository.FlightLocationRepository;
+import com.mp.passPocket.flight.data.dto.repository.FlightWishListRepository;
 import com.mp.passPocket.flight.data.dto.request.SearchConditionRequest;
+import com.mp.passPocket.flight.data.dto.response.FlightDetailResponse;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.AdditionalInfo;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightInfo;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightItineraryInfo;
@@ -25,6 +26,7 @@ import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightList;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightPriceInfo;
 import com.mp.passPocket.flight.data.dto.response.flightOffers.FlightSearchSegment;
 import com.mp.passPocket.flight.data.entity.PortCode;
+import com.mp.passPocket.flight.data.entity.WishList;
 import com.mp.passPocket.flight.service.FlightService;
 
 @Service
@@ -32,6 +34,7 @@ public class FlightServiceImpl implements FlightService {
 
 	private FlightLocationRepository flightLocationRepositroy;
 	private FlightAirlineRepository flightAirlineRepositroy;
+	private FlightWishListRepository flightWishListRepository;
 	private final Logger LOGGER = LoggerFactory.getLogger(FlightServiceImpl.class);
 	
 	
@@ -42,10 +45,12 @@ public class FlightServiceImpl implements FlightService {
 	@Autowired
 	public FlightServiceImpl(FlightLocationRepository flightLocationRepositroy, 
 			FlightAirlineRepository flightAirlineRepositroy, 
+			FlightWishListRepository flightWishListRepository,
 			RedisTemplate<String, Object> redisTemplate) {
 		super();
 		this.flightLocationRepositroy = flightLocationRepositroy;
 		this.flightAirlineRepositroy = flightAirlineRepositroy;
+		this.flightWishListRepository = flightWishListRepository;
 		this.redisTemplate = redisTemplate;
 	}
 	
@@ -223,6 +228,22 @@ public class FlightServiceImpl implements FlightService {
 	}
 	
 	
+	
+	/*
+	 * MongoDB 관련 메소드
+	 */
+	
+	public String saveWishItem(String key, FlightDetailResponse value){
+		WishList wishItem = new WishList(key, value);
+		WishList result = flightWishListRepository.save(wishItem);
+        if(result == null) return "400.ERROR";
+        return "200. OK";
+	}
+	
+	@Override
+	public List<WishList> getWishList(String userId) {
+		return flightWishListRepository.findByKey(userId);
+	}
 
 	
 	
@@ -241,6 +262,10 @@ public class FlightServiceImpl implements FlightService {
     public FlightList[] getFlightOffers(String flightKey) {
         return (FlightList[]) redisTemplate.opsForValue().get(flightKey);
     }
+
+
+
+	
 
 
 

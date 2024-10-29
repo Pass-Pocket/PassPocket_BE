@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 public class FlightDetailResponse {
 	
 	private String redisKey;
-	private String flightId;
 	private FlightList flight;
 	
 }
